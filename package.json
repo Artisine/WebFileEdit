@@ -1,0 +1,30 @@
+{
+	"name": "webfileedit",
+	"version": "1.0.0",
+	"description": "A Progressive Web App for file editing locally on-device",
+	"main": "index.js",
+	"scripts": {
+		"test": "echo Hello World!",
+		"watch": "tsc --watch",
+		"start": "npm run watch"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Artisine/WebFileEdit.git"
+	},
+	"keywords": [
+		"file",
+		"editor",
+		"pwa",
+		"local"
+	],
+	"author": "Artisine",
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/Artisine/WebFileEdit/issues"
+	},
+	"homepage": "https://github.com/Artisine/WebFileEdit#readme",
+	"devDependencies": {
+		"typescript": "^4.8.3"
+	}
+}

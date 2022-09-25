@@ -1,0 +1,18 @@
+{
+	"lang": "en-us",
+	"name": "WebFileEdit PWA",
+	"short_name": "WebEdit",
+	"description": "A Progressive Web App for file editing on-device",
+	"start_url": "/",
+	"background_color": "#2f3d58",
+	"theme_color": "#2f3d58",
+	"orientation": "any",
+	"display": "standalone",
+	"prefer_related_applications": true,
+	"icons": [
+		{
+			"src": "/icon512.png",
+			"sizes": "512x512"
+		}
+	]
+}

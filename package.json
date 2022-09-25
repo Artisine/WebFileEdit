@@ -6,7 +6,7 @@
 	"scripts": {
 		"test": "echo Hello World!",
 		"watch": "tsc --watch",
-		"start": "npm run watch"
+		"start": "node dev-server.js"
 	},
 	"repository": {
 		"type": "git",
@@ -25,6 +25,7 @@
 	},
 	"homepage": "https://github.com/Artisine/WebFileEdit#readme",
 	"devDependencies": {
+		"express": "^4.18.1",
 		"typescript": "^4.8.3"
 	}
 }

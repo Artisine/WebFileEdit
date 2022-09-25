@@ -4,17 +4,18 @@ const https = require("https");
 const fs = require("fs");
 const port = 8080;
 
-var key = fs.readFileSync(__dirname + "/certs/selfsigned.key");
-var cert = fs.readFileSync(__dirname + "/certs/selfsigned.crt");
-var options = {
+const key = fs.readFileSync(__dirname + "/certs/selfsigned.key");
+const cert = fs.readFileSync(__dirname + "/certs/selfsigned.crt");
+const options = {
 	key: key,
 	cert: cert
 };
 
-app = express()
-app.get("/", (req, res) => {
-	res.send('Now using https..');
-});
+app = express();
+// app.get("/", (req, res) => {
+// 	res.send('Now using https..');
+// });
+app.use(express.static(__dirname));
 
 const server = https.createServer(options, app);
 

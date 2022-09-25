@@ -1,6 +1,6 @@
 {
 	"compilerOptions": {
-		"outDir": "./built",
+		"outDir": "./built-js",
 		"allowJs": true,
 		"target": "ES5",
 
@@ -14,7 +14,7 @@
 		"strictPropertyInitialization": true,
 		"resolveJsonModule": true,
 	},
-	"include": ["./src/**/*"],
+	"include": ["./src-ts/**/*"],
 
 	// NEW: Options for file/directory watching
 	"watchOptions": {

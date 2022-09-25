@@ -10,8 +10,10 @@
 </head>
 <body>
 	<h1>My Sample PWA</h1>
-
-
+	<hr>
+	<div class="block" contenteditable="true">
+		<p>Hi I am a block</p>
+	</div>
 
 	<script>
 		if ("serviceWorker" in window.navigator) {
@@ -23,5 +25,10 @@
 			console.log("Failure: Service Workers not available.");
 		}
 	</script>
+
+	<link rel="stylesheet" type="text/css" href="./styles/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="./styles/index.css">
+	<link rel="stylesheet" type="text/css" href="./styles/blocks.css">
+
 </body>
 </html>

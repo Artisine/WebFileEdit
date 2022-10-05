@@ -1,6 +1,6 @@
 {
 	"compilerOptions": {
-		"outDir": "./built-js",
+		"outDir": "./built_js",
 		"allowJs": true,
 		"target": "ESNext",
 
@@ -25,7 +25,7 @@
 			"wicg-file-system-access"
 		]
 	},
-	"include": ["./src-ts/**/*"],
+	"include": ["src_ts/**/*"],
 
 	// NEW: Options for file/directory watching
 	"watchOptions": {

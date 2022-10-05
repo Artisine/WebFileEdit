@@ -1,6 +1,6 @@
 "use strict";
 function SayHello(msg) {
-    var out = String(msg);
+    const out = String(msg);
     console.log(out);
     return out;
 }

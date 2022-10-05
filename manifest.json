@@ -11,7 +11,7 @@
 	"prefer_related_applications": true,
 	"icons": [
 		{
-			"src": "/icon512.png",
+			"src": "/icon512.svg",
 			"sizes": "512x512"
 		}
 	]

@@ -3,17 +3,24 @@
 <head>
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width,initial-scale=1" />
-	<link rel="shortcut icon" href="https://c.s-microsoft.com/favicon.ico?v2" />
+	<link rel="shortcut icon" href="./icon512.svg" />
 	<title>My Sample PWA</title>
 	<link rel="manifest" href="./manifest.json"/>
 
+	<script src="./built-js/less.js" type="text/javascript"></script>
 </head>
-<body>
-	<h1>My Sample PWA</h1>
+<body style="display:none;">
+	<h1>@Artisine/WebFileEdit</h1>
 	<hr>
-	<div class="block" contenteditable="true">
-		<p>Hi I am a block</p>
-	</div>
+	<main class="container">
+		<p>Top of page</p>
+		<div id="blocktest" class="block" contenteditable="true">
+			<p>Hi I am a block</p>
+		</div>
+
+		<button id="test1" class="btn btn-primary">Open File Picker</button>
+		<p>Bottom of Page :P</p>
+	</main>
 
 	<script>
 		if ("serviceWorker" in window.navigator) {
@@ -26,9 +33,9 @@
 		}
 	</script>
 
-	<link rel="stylesheet" type="text/css" href="./styles/bootstrap.min.css">
+	<!-- <link rel="stylesheet" type="text/css" href="./styles/bootstrap.min.css">
 	<link rel="stylesheet" type="text/css" href="./styles/index.css">
-	<link rel="stylesheet" type="text/css" href="./styles/blocks.css">
-
+	<link rel="stylesheet" type="text/css" href="./styles/blocks.css"> -->
+	<script src="./built-js/client.js" type="module"></script>
 </body>
 </html>

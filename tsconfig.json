@@ -2,9 +2,9 @@
 	"compilerOptions": {
 		"outDir": "./built-js",
 		"allowJs": true,
-		"target": "ES5",
+		"target": "ESNext",
 
-		"module": "CommonJS",
+		"module": "ESNext",
 		"strict": true,
 		"noImplicitAny": true,
 		"strictNullChecks": true,
@@ -12,7 +12,18 @@
 		"noImplicitReturns": true,
 		"noPropertyAccessFromIndexSignature": false,
 		"strictPropertyInitialization": true,
-		"resolveJsonModule": true,
+		// "resolveJsonModule": true,
+
+		"lib": [
+			"ES2015", 
+			"DOM", 
+			"ESNext",
+			"ESNext.AsyncIterable"
+		],
+
+		"types": [
+			"wicg-file-system-access"
+		]
 	},
 	"include": ["./src-ts/**/*"],
 

@@ -16,7 +16,7 @@ export class ResourceService {
 		"wav", "mp3", "mpeg", 
 		"mp4", "mkv", "json", 
 		"xml", "manifest", "webmanifest", 
-		"less", "scss", "sass"
+		"less", "scss", "sass", "map"
 	];
 	
 	/**
@@ -80,10 +80,10 @@ export class ResourceService {
 	static GetResourceThenAppendToBody(url: string, format: ("json" | "text" | "blob"), options: any={}) {
 		const the_resource = ResourceService.GetResource(url, format, options);
 		if (the_resource) {
-			console.info(`Attempting load of ${url}`);
+			console.logg(1, `Attempting load of ${url}`);
 			the_resource.then((ar) => {
 				ar!.AppendToBody();
-				console.info(`Loaded ${url}`);
+				console.logg(1, `Loaded ${url}`);
 				return ar;
 			}).catch(console.error);
 		}
@@ -98,7 +98,7 @@ export class ResourceService {
 	 */
 	static async CreateResourceInSitu(url: string, type: ("json" | "text" | "script" | "js" | "css"), data: string, options: any={}) {
 		if (ResourceService.Storage.has(url)) {
-			console.error(`Already has resource with URL ${url}`);
+			console.logg(1, `[Error] Already has resource with URL ${url}`);
 			// return undefined;
 			return ResourceService.Storage.get(url);
 		}
@@ -128,14 +128,14 @@ class AppResource {
 	 * 
 	 * @param {{
 	 * Name: string,
-	 * Type: ("html" | "css" | "js" | "script" | "json" | "less"),
+	 * Type: ("html" | "css" | "js" | "script" | "json" | "less" | "map"),
 	 * Data: (Blob | json | string),
 	 * LinkURL: string
 	 * }} config 
 	 */
 	constructor(config: {
 			Name: string;
-			Type: ("html" | "css" | "js" | "script" | "json" | "less");
+			Type: ("html" | "css" | "js" | "script" | "json" | "less" | "map");
 			Data: (Blob | JSON | string);
 			LinkURL: string;
 		}) {
@@ -186,6 +186,12 @@ class AppResource {
 			scriptTag.textContent = this.Data;
 			// scriptTag.
 			document.body.append(scriptTag);
+		} else if (this.Type === "map") {
+			const linkTag = document.createElement("link");
+			linkTag.setAttribute("rel", "stylesheet");
+			linkTag.setAttribute("data-linkurl", this.LinkURL);
+			linkTag.href = this.LinkURL;
+			document.body.append(linkTag);
 		}
 	}
 

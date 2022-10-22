@@ -2,8 +2,7 @@
 	"compilerOptions": {
 		"outDir": "./built_js",
 		"allowJs": true,
-		"target": "ESNext",
-
+		
 		"module": "ESNext",
 		"strict": true,
 		"noImplicitAny": true,
@@ -14,11 +13,10 @@
 		"strictPropertyInitialization": true,
 		// "resolveJsonModule": true,
 
+		"target": "ES6",
 		"lib": [
-			"ES2015", 
 			"DOM", 
-			"ESNext",
-			"ESNext.AsyncIterable"
+			"ESNext"
 		],
 
 		"types": [

@@ -3,23 +3,42 @@
 <head>
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width,initial-scale=1" />
-	<link rel="shortcut icon" href="./icon512.svg" />
+	<link rel="shortcut icon" href="./favicon.ico" />
 	<title>My Sample PWA</title>
 	<link rel="manifest" href="./manifest.json"/>
 
-	<script src="./built-js/less.js" type="text/javascript"></script>
 </head>
-<body style="display:none;">
-	<h1>@Artisine/WebFileEdit</h1>
-	<hr>
-	<main class="container">
-		<p>Top of page</p>
-		<div id="blocktest" class="block" contenteditable="true">
-			<p>Hi I am a block</p>
-		</div>
+<body>
+	<style>
+		body {
+			display: none;
+		}
+	</style>
+	<main class="">
 
-		<button id="test1" class="btn btn-primary">Open File Picker</button>
-		<p>Bottom of Page :P</p>
+		<section id="page-storage" class="ar-window"></section>
+		<section id="page-display" class="ar-window">
+
+			<article data-page-id="default" class="ar-page">
+				<h1 class="ar-title" contenteditable="true">Title: Hello World!</h1>
+				<p class="ar-text" contenteditable="true">Hello World! 
+					Welcome to <span data-text-replace="true">AppName</span>, 
+					your personal notepad.
+				</p>
+				<figure class="ar-image-container">
+					<img src="./icon512.svg" alt="This app's icon" />
+					<figcaption contenteditable="true">This app's icon is good looking eh?</figcaption>
+				</figure>
+				<p>Some random general paragraph tag which won't fit the criteria</p>
+			</article>
+		</section>
+		
+		<!-- <section data-page-id="example1" class="ar-window">
+			<h1>Example Page 1</h1>
+			<p>yeah, nothing much here</p>
+		</section> -->
+
+
 	</main>
 
 	<script>
@@ -32,10 +51,13 @@
 			console.log("Failure: Service Workers not available.");
 		}
 	</script>
+	<script src="./built_js/less.js" type="text/javascript"></script>
 
 	<!-- <link rel="stylesheet" type="text/css" href="./styles/bootstrap.min.css">
 	<link rel="stylesheet" type="text/css" href="./styles/index.css">
 	<link rel="stylesheet" type="text/css" href="./styles/blocks.css"> -->
 	<script src="./built_js/client.js" type="module"></script>
+
+	
 </body>
 </html>

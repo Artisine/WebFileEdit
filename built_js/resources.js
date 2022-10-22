@@ -1,67 +1,64 @@
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 export class ResourceService {
-    static Parser = new DOMParser();
-    /**
-     * @type {Map<AppResource["LinkURL"], AppResource}
-     */
-    static Storage = new Map();
-    static ValidFileFormats = [
-        "html", "css", "js",
-        "woff", "woff2", "gif",
-        "png", "jpg", "jpeg",
-        "wav", "mp3", "mpeg",
-        "mp4", "mkv", "json",
-        "xml", "manifest", "webmanifest",
-        "less", "scss", "sass"
-    ];
     /**
      *
      * @param {string} url
      * @param {("json" | "text" | "blob")} format
      * @param {*} options
      */
-    static async GetResource(url, format, options = {}) {
-        if (ResourceService.Storage.has(url)) {
-            return undefined;
-        }
-        const fetch_prom = fetch(url, options).then((res) => {
-            if (format === "json") {
-                return res.json();
+    static GetResource(url, format, options = {}) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (ResourceService.Storage.has(url)) {
+                return undefined;
             }
-            else if (format === "blob") {
-                return res.blob();
-            }
-            else {
-                return res.text();
-            }
-        }).catch(console.error);
-        const fetch_result = await fetch_prom;
-        if (format === "text" && fetch_result) {
-            const fileType = (() => {
-                const formats = ResourceService.ValidFileFormats;
-                let the_format = "html";
-                for (let i = 0; i < formats.length; i += 1) {
-                    const entry = formats[i];
-                    if (url.endsWith(`.${entry}`)) {
-                        the_format = entry;
-                        break;
-                    }
+            const fetch_prom = fetch(url, options).then((res) => {
+                if (format === "json") {
+                    return res.json();
                 }
-                return the_format;
-            })();
-            const parser = ResourceService.Parser;
-            const doc = parser.parseFromString(fetch_result, "text/html");
-            const doc_body_children = doc.body.childNodes;
-            const ar = new AppResource({
-                Name: url,
-                Data: fetch_result,
-                // @ts-ignore
-                Type: fileType,
-                LinkURL: url
-            });
-            ResourceService.Storage.set(url, ar);
-            return ar;
-        }
-        return undefined;
+                else if (format === "blob") {
+                    return res.blob();
+                }
+                else {
+                    return res.text();
+                }
+            }).catch(console.error);
+            const fetch_result = yield fetch_prom;
+            if (format === "text" && fetch_result) {
+                const fileType = (() => {
+                    const formats = ResourceService.ValidFileFormats;
+                    let the_format = "html";
+                    for (let i = 0; i < formats.length; i += 1) {
+                        const entry = formats[i];
+                        if (url.endsWith(`.${entry}`)) {
+                            the_format = entry;
+                            break;
+                        }
+                    }
+                    return the_format;
+                })();
+                const parser = ResourceService.Parser;
+                const doc = parser.parseFromString(fetch_result, "text/html");
+                const doc_body_children = doc.body.childNodes;
+                const ar = new AppResource({
+                    Name: url,
+                    Data: fetch_result,
+                    // @ts-ignore
+                    Type: fileType,
+                    LinkURL: url
+                });
+                ResourceService.Storage.set(url, ar);
+                return ar;
+            }
+            return undefined;
+        });
     }
     /**
      *
@@ -72,10 +69,10 @@ export class ResourceService {
     static GetResourceThenAppendToBody(url, format, options = {}) {
         const the_resource = ResourceService.GetResource(url, format, options);
         if (the_resource) {
-            console.info(`Attempting load of ${url}`);
+            console.logg(1, `Attempting load of ${url}`);
             the_resource.then((ar) => {
                 ar.AppendToBody();
-                console.info(`Loaded ${url}`);
+                console.logg(1, `Loaded ${url}`);
                 return ar;
             }).catch(console.error);
         }
@@ -87,36 +84,45 @@ export class ResourceService {
      * @param {string} data
      * @param {*} options
      */
-    static async CreateResourceInSitu(url, type, data, options = {}) {
-        if (ResourceService.Storage.has(url)) {
-            console.error(`Already has resource with URL ${url}`);
-            // return undefined;
-            return ResourceService.Storage.get(url);
-        }
-        const ar = new AppResource({
-            Data: data,
-            LinkURL: url,
-            Name: url,
-            // @ts-ignore
-            Type: type
+    static CreateResourceInSitu(url, type, data, options = {}) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (ResourceService.Storage.has(url)) {
+                console.logg(1, `[Error] Already has resource with URL ${url}`);
+                // return undefined;
+                return ResourceService.Storage.get(url);
+            }
+            const ar = new AppResource({
+                Data: data,
+                LinkURL: url,
+                Name: url,
+                // @ts-ignore
+                Type: type
+            });
+            ResourceService.Storage.set(ar.LinkURL, ar);
+            return ar;
         });
-        ResourceService.Storage.set(ar.LinkURL, ar);
-        return ar;
     }
 }
+ResourceService.Parser = new DOMParser();
+/**
+ * @type {Map<AppResource["LinkURL"], AppResource}
+ */
+ResourceService.Storage = new Map();
+ResourceService.ValidFileFormats = [
+    "html", "css", "js",
+    "woff", "woff2", "gif",
+    "png", "jpg", "jpeg",
+    "wav", "mp3", "mpeg",
+    "mp4", "mkv", "json",
+    "xml", "manifest", "webmanifest",
+    "less", "scss", "sass", "map"
+];
 class AppResource {
-    LinkURL;
-    ClassName;
-    Name;
-    Type;
-    Data;
-    HtmlDoc;
-    HtmlDocBody;
     /**
      *
      * @param {{
      * Name: string,
-     * Type: ("html" | "css" | "js" | "script" | "json" | "less"),
+     * Type: ("html" | "css" | "js" | "script" | "json" | "less" | "map"),
      * Data: (Blob | json | string),
      * LinkURL: string
      * }} config
@@ -171,6 +177,13 @@ class AppResource {
             scriptTag.textContent = this.Data;
             // scriptTag.
             document.body.append(scriptTag);
+        }
+        else if (this.Type === "map") {
+            const linkTag = document.createElement("link");
+            linkTag.setAttribute("rel", "stylesheet");
+            linkTag.setAttribute("data-linkurl", this.LinkURL);
+            linkTag.href = this.LinkURL;
+            document.body.append(linkTag);
         }
     }
 }

@@ -1,0 +1,30 @@
+
+.ar-window {
+	width: 100vw;
+	height: 100vh;
+	@media (prefers-color-scheme: light) {
+		& {
+		  background: #FFF;
+		  color: #333;
+		}
+	}
+	@media (prefers-color-scheme: dark) {
+		& {
+			background: #333;
+			color: #FFF;
+		}
+	}	
+}
+
+body {}
+main {
+	width: 100%;
+	height: 100%;
+}
+
+#page-storage {
+	display: none;
+}
+#page-display {
+	display: block;
+}

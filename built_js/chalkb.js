@@ -1,6 +1,10 @@
 ;
 ;
 export class Chalk {
+    static DefineCustomColor(name, value) {
+        Chalk.CustomColors.set(name, value);
+        return Chalk.CustomColors.get(name);
+    }
     constructor() {
         this.ClassName = "Chalk";
         this.Name = "Chalk";
@@ -19,10 +23,6 @@ export class Chalk {
             supportTrueColor: true
         };
         this.Class = Chalk;
-    }
-    static DefineCustomColor(name, value) {
-        Chalk.CustomColors.set(name, value);
-        return Chalk.CustomColors.get(name);
     }
     /*
 

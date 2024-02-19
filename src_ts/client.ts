@@ -17,6 +17,7 @@ import {
 } from "./resources.js";
 import { Chalk, chalk } from "./chalkb.js";
 import Collection from "./collection/collection.js";
+import { TextStuff } from "./app/textstuff.js";
 // chalk.setConfig(
 // 	Object.assign({}, Chalk.DefaultConfig, {
 // 		consoleLogFromChalkFile: true
@@ -133,7 +134,7 @@ abstract class AppGlobal {
 	static storage: T_AppGlobal_Storage = new Collection();
 
 	static OnceInit() {
-		this.storage.set("AppName", "ArPlanner");
+		this.storage.set("AppName", "WebFileEdit");
 
 
 		const thingsReplace = Array.from(document.querySelectorAll(`[data-text-replace="true"]`)) as HTMLElement[];
@@ -145,6 +146,9 @@ abstract class AppGlobal {
 			}
 			elem.removeAttribute("data-text-replace");
 		});
+
+
+		TextStuff.OnceInit();
 
 	}
 }

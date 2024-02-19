@@ -14,6 +14,7 @@ import { PageService } from "./pageService.js";
 import { ResourceService } from "./resources.js";
 import { Chalk, chalk } from "./chalkb.js";
 import Collection from "./collection/collection.js";
+import { TextStuff } from "./app/textstuff.js";
 // chalk.setConfig(
 // 	Object.assign({}, Chalk.DefaultConfig, {
 // 		consoleLogFromChalkFile: true
@@ -97,7 +98,7 @@ LoadDependencies().then(() => {
 ;
 class AppGlobal {
     static OnceInit() {
-        this.storage.set("AppName", "ArPlanner");
+        this.storage.set("AppName", "WebFileEdit");
         const thingsReplace = Array.from(document.querySelectorAll(`[data-text-replace="true"]`));
         thingsReplace.forEach((elem) => {
             if (elem.textContent !== null) {
@@ -107,6 +108,7 @@ class AppGlobal {
             }
             elem.removeAttribute("data-text-replace");
         });
+        TextStuff.OnceInit();
     }
 }
 AppGlobal.storage = new Collection();

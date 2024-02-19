@@ -12,6 +12,10 @@ import { Debounce } from "./debounce.js";
 import { Page } from "./page.js";
 import { UIManager } from "./ui.js";
 ;
+function isNullish(thing) {
+    return (thing === null || thing === undefined);
+}
+;
 class PageService {
     static ScanDOMforRoguePages() {
         const hits = Array.from(document.body.querySelectorAll(`[data-page-id]`));
@@ -25,7 +29,9 @@ class PageService {
                 return false;
         });
         rogues.forEach((rogueElem) => {
-            this.RegisterRoguePage(rogueElem);
+            if (!isNullish(rogueElem)) {
+                this.RegisterRoguePage(rogueElem);
+            }
         });
     }
     static CheckSuspectedRoguePageStructure(rogueElement) {
@@ -105,10 +111,10 @@ class PageService {
             // Debounce.Remove("UIManager:OnceInit");
             // console.log(Debounce.debounces);
             // test concluded: Debounce.Remove does indeed work.
-            this.ScanDOMforRoguePages();
+            // this.ScanDOMforRoguePages();
             // I can guarantee that page:id=default exists
-            const pageDefault = this.GetPageById("default");
-            this.ShowPage(pageDefault);
+            // const pageDefault = this.GetPageById("default")!
+            // this.ShowPage(pageDefault);
         });
     }
 }

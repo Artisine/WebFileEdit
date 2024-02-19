@@ -13,6 +13,10 @@ interface PageConstructorConfig {
 	Name?: string
 };
 
+function isNullish(thing: unknown) {
+	return (thing === null || thing === undefined);
+};
+
 abstract class PageService {
 	static pages_collection: Collection<Page["Id"], Page> = new Collection();
 
@@ -26,7 +30,9 @@ abstract class PageService {
 			else return false;
 		});
 		rogues.forEach((rogueElem) => {
-			this.RegisterRoguePage(rogueElem);
+			if (!isNullish(rogueElem)) {
+				this.RegisterRoguePage(rogueElem);
+			}
 		});
 	}
 	static CheckSuspectedRoguePageStructure(rogueElement: HTMLElement) {
@@ -118,10 +124,10 @@ abstract class PageService {
 		// console.log(Debounce.debounces);
 		// test concluded: Debounce.Remove does indeed work.
 
-		this.ScanDOMforRoguePages();
+		// this.ScanDOMforRoguePages();
 		// I can guarantee that page:id=default exists
-		const pageDefault = this.GetPageById("default")!
-		this.ShowPage(pageDefault);
+		// const pageDefault = this.GetPageById("default")!
+		// this.ShowPage(pageDefault);
 
 	}
 

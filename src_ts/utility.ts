@@ -30,5 +30,11 @@ export function AntiXSS_StripScripts(inputString: string) {
 };
 
 
+export function isNullish(thing: unknown): thing is (undefined|null) {
+	return thing === undefined || thing === null;
+};
+export function isString(thing: unknown): thing is string {
+	return typeof thing === "string";
+};
 
 // "End of File utility.js";

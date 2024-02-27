@@ -40,4 +40,12 @@ export function AntiXSS_StripScripts(inputString) {
     return encodedStr;
 }
 ;
+export function isNullish(thing) {
+    return thing === undefined || thing === null;
+}
+;
+export function isString(thing) {
+    return typeof thing === "string";
+}
+;
 // "End of File utility.js";

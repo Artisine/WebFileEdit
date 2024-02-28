@@ -1,4 +1,5 @@
 import { isNullish, isString } from "../utility.js";
+import { milliseconds } from "../utility/timings.js";
 export class TextStuff {
     static OnceInit() {
         main();
@@ -48,6 +49,38 @@ function addListenersToEditable(editable) {
         const evt = _evt;
         when_keyStateChange(editable, evt, "down");
     });
+}
+;
+const deferredTimeouts = new Map();
+function makeNewTimeout(editable, timeoutMs, callback) {
+    var _a;
+    const timeouts = (_a = deferredTimeouts.get(editable)) !== null && _a !== void 0 ? _a : [];
+    const id = window.setTimeout(() => {
+        callback();
+        cleanupTimeout(editable, id);
+    }, timeoutMs);
+    timeouts.push(id);
+    deferredTimeouts.set(editable, timeouts);
+    return id;
+}
+;
+function cleanupTimeout(editable, id) {
+    const timeouts = deferredTimeouts.get(editable);
+    if (timeouts) {
+        const index = timeouts.indexOf(id);
+        if (index !== -1) {
+            timeouts.splice(index, 1);
+        }
+        const length = timeouts.length;
+        if (length === 0) {
+            deferredTimeouts.delete(editable);
+        }
+        else {
+            deferredTimeouts.set(editable, timeouts);
+        }
+    }
+    // re-assign to map
+    return;
 }
 ;
 function makeNewTextEditable(originEditable) {
@@ -174,7 +207,7 @@ function attempt_editable_deletion(editable, evt) {
         const attemptDeleteCount = editableTapDeletionCountAttribute(editable);
         if (!isNullish(attemptDeleteCount) && isString(attemptDeleteCount)) {
             const count = parseInt(attemptDeleteCount);
-            if (count >= 1) {
+            if (count >= 2) {
                 editableTapDeletionCountAttribute(editable, 0);
                 const previousEditable = editable.previousElementSibling;
                 editable.remove();
@@ -194,10 +227,16 @@ function attempt_editable_deletion(editable, evt) {
                 print(`Editable removed: `, editable);
             }
             else {
+                editable.classList.add("flash-red");
                 editableTapDeletionCountAttribute(editable, count + 1);
+                makeNewTimeout(editable, milliseconds(500), () => {
+                    editable.classList.remove("flash-red");
+                    editableTapDeletionCountAttribute(editable, 1);
+                });
             }
         }
         else {
+            // editable.classList.add("flash-red");
             editableTapDeletionCountAttribute(editable, 1);
         }
     }

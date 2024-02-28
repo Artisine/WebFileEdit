@@ -51,6 +51,7 @@ function addListenersToEditable(editable) {
     });
 }
 ;
+const durationDeletionAttemptWaiting = milliseconds(700);
 const deferredTimeouts = new Map();
 function makeNewTimeout(editable, timeoutMs, callback) {
     var _a;
@@ -92,6 +93,7 @@ function makeNewTextEditable(originEditable) {
     originEditable.after(newEditable);
     print(`New editable created: `, newEditable, originEditable);
     addListenersToEditable(newEditable);
+    editableTapDeletionCountAttribute(newEditable, 1);
     return newEditable;
 }
 ;
@@ -199,7 +201,9 @@ function when_insertFromPaste(editable, inputEvent) {
 }
 ;
 function attempt_editable_deletion(editable, evt) {
+    var _a, _b;
     const text = editable.textContent;
+    editable.setAttribute("data-old-length", (_a = text === null || text === void 0 ? void 0 : text.length.toString()) !== null && _a !== void 0 ? _a : "0");
     if ((text === null || text === void 0 ? void 0 : text.length) === 0) {
         // see if this editable has an attribute "data-attempt-delete-count"
         // if it does, increment it by 1. if >= 1, remove the attribute and remove the editable
@@ -207,7 +211,8 @@ function attempt_editable_deletion(editable, evt) {
         const attemptDeleteCount = editableTapDeletionCountAttribute(editable);
         if (!isNullish(attemptDeleteCount) && isString(attemptDeleteCount)) {
             const count = parseInt(attemptDeleteCount);
-            if (count >= 2) {
+            const old_count = parseInt((_b = editable.getAttribute("data-old-length")) !== null && _b !== void 0 ? _b : "0");
+            if (count >= 2 && old_count >= text.length) {
                 editableTapDeletionCountAttribute(editable, 0);
                 const previousEditable = editable.previousElementSibling;
                 editable.remove();
@@ -229,9 +234,9 @@ function attempt_editable_deletion(editable, evt) {
             else {
                 editable.classList.add("flash-red");
                 editableTapDeletionCountAttribute(editable, count + 1);
-                makeNewTimeout(editable, milliseconds(500), () => {
+                makeNewTimeout(editable, durationDeletionAttemptWaiting, () => {
                     editable.classList.remove("flash-red");
-                    editableTapDeletionCountAttribute(editable, 1);
+                    editableTapDeletionCountAttribute(editable, count);
                 });
             }
         }
@@ -244,6 +249,7 @@ function attempt_editable_deletion(editable, evt) {
 }
 ;
 function collate_when_contentInserted(editable, inputEvent) {
+    var _a;
     const text = editable.textContent;
     if ((text === null || text === void 0 ? void 0 : text.length) === 0) {
         // if the text is empty, and there is a newline character at the end of the editable, remove it
@@ -252,6 +258,7 @@ function collate_when_contentInserted(editable, inputEvent) {
     if (!isNullish(text === null || text === void 0 ? void 0 : text.length) && text.length > 0) {
         // if editable has data-tag "data-attempt-delete-count", remove it
         editableTapDeletionCountAttribute(editable, 0);
+        editable.setAttribute("data-old-length", (_a = text === null || text === void 0 ? void 0 : text.length.toString()) !== null && _a !== void 0 ? _a : "0");
     }
     return;
 }
@@ -263,6 +270,8 @@ function main() {
     textEditables.forEach((elem) => {
         elem.setAttribute("contenteditable", "true");
         addListenersToEditable(elem);
+        // editableTapDeletionCountAttribute(elem, 1);
+        print(`Editable: `, elem);
     });
     console.log("End of main.");
 }

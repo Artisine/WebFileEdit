@@ -1,4 +1,5 @@
 import { isNullish, isString } from "../utility.js";
+import { setCursorOffsetCharactersFromEnd, setCursorToEnd } from "../utility/textcursors/cursors.js";
 import { milliseconds } from "../utility/timings.js";
 
 export class TextStuff {
@@ -12,7 +13,7 @@ export class TextStuff {
 
 const print = console.log;
 
-type T_handlerFunc = (editable: Element, inputEvent: InputEvent) => void;
+type T_handlerFunc = (editable: HTMLElement, inputEvent: InputEvent) => void;
 const inputTypesAndTheirAssociatedHandlerFunctions: Partial<Record<InputEvent["inputType"], T_handlerFunc>> = {
 	"insertParagraph": when_newParagraph,
 	"insertLineBreak": when_newLineBreak,
@@ -30,7 +31,7 @@ const inputTypesAndTheirAssociatedHandlerFunctions: Partial<Record<InputEvent["i
 };
 
 
-function addListenersToEditable(editable: Element) {
+function addListenersToEditable(editable: HTMLElement) {
 	// check if editable has tag
 	if (editable.getAttribute("data-has-listeners") === "true") {
 		// if it does, return
@@ -56,8 +57,8 @@ function addListenersToEditable(editable: Element) {
 	});
 };
 const durationDeletionAttemptWaiting = milliseconds(700);
-const deferredTimeouts = new Map<Element, Array<number>>();
-function makeNewTimeout(editable: Element, timeoutMs: number, callback: () => unknown) {
+const deferredTimeouts = new Map<HTMLElement, Array<number>>();
+function makeNewTimeout(editable: HTMLElement, timeoutMs: number, callback: () => unknown) {
 	const timeouts = deferredTimeouts.get(editable) ?? [];
 	const id = window.setTimeout(()=>{
 		callback();
@@ -67,7 +68,7 @@ function makeNewTimeout(editable: Element, timeoutMs: number, callback: () => un
 	deferredTimeouts.set(editable, timeouts);
 	return id;
 };
-function cleanupTimeout(editable: Element, id: number) {
+function cleanupTimeout(editable: HTMLElement, id: number) {
 	const timeouts = deferredTimeouts.get(editable);
 	if (timeouts) {
 		const index = timeouts.indexOf(id);
@@ -85,7 +86,7 @@ function cleanupTimeout(editable: Element, id: number) {
 	return;
 };
 
-function makeNewTextEditable(originEditable: Element) {
+function makeNewTextEditable(originEditable: HTMLElement) {
 	const newEditable = document.createElement("p");
 	newEditable.classList.add("text");
 	newEditable.setAttribute("contenteditable", "true");
@@ -97,14 +98,14 @@ function makeNewTextEditable(originEditable: Element) {
 	editableTapDeletionCountAttribute(newEditable, 1);
 	return newEditable;
 };
-function removeTrailingNewlineCharacter(editable: Element) {
+function removeTrailingNewlineCharacter(editable: HTMLElement) {
 	const text = editable.textContent;
 	if (text && text[text.length - 1] === "\n") {
 		editable.textContent = text.slice(0, -1);
 	}
 	return editable;
 };
-function removeTrailingBrTag(editable: Element) {
+function removeTrailingBrTag(editable: HTMLElement) {
 	const lastChild = editable.lastChild;
 	if (lastChild instanceof HTMLBRElement) {
 		editable.removeChild(lastChild);
@@ -112,7 +113,7 @@ function removeTrailingBrTag(editable: Element) {
 	return editable;
 };
 
-function editableTapDeletionCountAttribute(editable: Element, count?: number) {
+function editableTapDeletionCountAttribute(editable: HTMLElement, count?: number) {
 	if (isNullish(count)) {
 		return editable.getAttribute("data-attempt-delete-count");
 	} else {
@@ -125,7 +126,7 @@ function editableTapDeletionCountAttribute(editable: Element, count?: number) {
 	}
 };
 
-function when_keyStateChange(editable: Element, keyEvent: KeyboardEvent, state: ("up"|"down")) {
+function when_keyStateChange(editable: HTMLElement, keyEvent: KeyboardEvent, state: ("up"|"down")) {
 	print(`Key state change detected: `, editable, keyEvent, state);
 	if (state === "down") {
 		if (keyEvent.key === "Backspace") {
@@ -136,7 +137,7 @@ function when_keyStateChange(editable: Element, keyEvent: KeyboardEvent, state: 
 	return;
 };
 
-function when_newParagraph(editable: Element, inputEvent: InputEvent) {
+function when_newParagraph(editable: HTMLElement, inputEvent: InputEvent) {
 	print(`New paragraph detected: `, editable, inputEvent);
 	const newEditable = makeNewTextEditable(editable);
 	inputEvent.preventDefault();
@@ -144,54 +145,54 @@ function when_newParagraph(editable: Element, inputEvent: InputEvent) {
 	removeTrailingBrTag(editable);
 	newEditable.focus();
 };
-function when_newLineBreak(editable: Element, inputEvent: InputEvent) {
+function when_newLineBreak(editable: HTMLElement, inputEvent: InputEvent) {
 	print(`New line break detected: `, editable, inputEvent);
 };
-function when_deleteContentBackward(editable: Element, inputEvent: InputEvent) {
+function when_deleteContentBackward(editable: HTMLElement, inputEvent: InputEvent) {
 	print(`Delete content backward detected: `, editable, inputEvent);
 
 	attempt_editable_deletion(editable, inputEvent);
 
 	return;
 };
-function when_deleteWordBackward(editable: Element, inputEvent: InputEvent) {
+function when_deleteWordBackward(editable: HTMLElement, inputEvent: InputEvent) {
 	print(`Delete word backward detected: `, editable, inputEvent);
 };
-function when_deleteContentForward(editable: Element, inputEvent: InputEvent) {
+function when_deleteContentForward(editable: HTMLElement, inputEvent: InputEvent) {
 	print(`Delete content forward detected: `, editable, inputEvent);
 };
-function when_deleteWordForward(editable: Element, inputEvent: InputEvent) {
+function when_deleteWordForward(editable: HTMLElement, inputEvent: InputEvent) {
 	print(`Delete word forward detected: `, editable, inputEvent);
 };
-function when_insertText(editable: Element, inputEvent: InputEvent) {
+function when_insertText(editable: HTMLElement, inputEvent: InputEvent) {
 	print(`Insert text detected: `, editable, inputEvent);
 
 
 	return collate_when_contentInserted(editable, inputEvent);
 };
-function when_deleteByDrag(editable: Element, inputEvent: InputEvent) {
+function when_deleteByDrag(editable: HTMLElement, inputEvent: InputEvent) {
 	print(`Delete by drag detected: `, editable, inputEvent);
 };
-function when_insertFromDrop(editable: Element, inputEvent: InputEvent) {
+function when_insertFromDrop(editable: HTMLElement, inputEvent: InputEvent) {
 	print(`Insert from drop detected: `, editable, inputEvent);
 };
-function when_historyUndo(editable: Element, inputEvent: InputEvent) {
+function when_historyUndo(editable: HTMLElement, inputEvent: InputEvent) {
 	print(`History undo detected: `, editable, inputEvent);
 };
-function when_historyRedo(editable: Element, inputEvent: InputEvent) {
+function when_historyRedo(editable: HTMLElement, inputEvent: InputEvent) {
 	print(`History redo detected: `, editable, inputEvent);
 };
-function when_deleteByCut(editable: Element, inputEvent: InputEvent) {
+function when_deleteByCut(editable: HTMLElement, inputEvent: InputEvent) {
 	print(`Delete by cut detected: `, editable, inputEvent);
 };
-function when_insertFromPaste(editable: Element, inputEvent: InputEvent) {
+function when_insertFromPaste(editable: HTMLElement, inputEvent: InputEvent) {
 	print(`Insert from paste detected: `, editable, inputEvent);
 
 	return collate_when_contentInserted(editable, inputEvent);
 };
 
 
-function attempt_editable_deletion(editable: Element, evt: Event) {
+function attempt_editable_deletion(editable: HTMLElement, evt: Event) {
 	const text = editable.textContent;
 	editable.setAttribute("data-old-length", text?.length.toString() ?? "0");
 	if (text?.length === 0) {
@@ -212,12 +213,7 @@ function attempt_editable_deletion(editable: Element, evt: Event) {
 				if (previousEditable instanceof HTMLElement) {
 					previousEditable.focus();
 					// and set cursor to end of text
-					const range = document.createRange();
-					const selection = window.getSelection();
-					range.selectNodeContents(previousEditable);
-					range.collapse(false);
-					selection?.removeAllRanges();
-					selection?.addRange(range);
+					setCursorToEnd(previousEditable);
 					evt.preventDefault();
 				}
 
@@ -234,10 +230,43 @@ function attempt_editable_deletion(editable: Element, evt: Event) {
 			// editable.classList.add("flash-red");
 			editableTapDeletionCountAttribute(editable, 1);
 		}
+	} else {
+		print(`Editable not empty: `, editable);
+		// where length >= 1
+
+		// check if cursor is at very beginning
+		const selection = window.getSelection();
+		const range = selection?.getRangeAt(0);
+		const startContainer = range?.startContainer;
+		const startOffset = range?.startOffset;
+		const previousEditable = editable.previousElementSibling;
+		const shouldAppendToPreviousParagraph = (
+			startContainer?.parentElement === editable
+			 && startOffset === 0
+			 && previousEditable instanceof HTMLElement
+			 && !isNullish(previousEditable.textContent)
+			 && !isNullish(text)
+		);
+		print(`startcontainer: `, startContainer, `startOffset: `, startOffset, `previousEditable: `, previousEditable, `shouldAppendToPreviousParagraph: `, shouldAppendToPreviousParagraph);
+		print(`Should append to previous paragraph: `, shouldAppendToPreviousParagraph, previousEditable);
+		if (shouldAppendToPreviousParagraph) {
+			editable.blur();
+			const originalLength = text.length;
+			previousEditable.textContent += text;
+			editable.remove();
+			previousEditable.focus();
+			// and set cursor to end of text
+			// setCursorToEnd(previousEditable);
+			setCursorOffsetCharactersFromEnd(previousEditable, originalLength);
+			evt.preventDefault();
+		}
+		
+
+
 	}
 	return;
 };
-function collate_when_contentInserted(editable: Element, inputEvent: InputEvent) {
+function collate_when_contentInserted(editable: HTMLElement, inputEvent: InputEvent) {
 	const text = editable.textContent;
 	if (text?.length === 0) {
 		// if the text is empty, and there is a newline character at the end of the editable, remove it
@@ -264,7 +293,8 @@ function main() {
 	const textEditables = holder.querySelectorAll("p.text");
 	textEditables.forEach((elem) => {
 		elem.setAttribute("contenteditable", "true");
-		addListenersToEditable(elem);
+		elem = elem as HTMLElement;
+		addListenersToEditable(elem as HTMLElement);
 		// editableTapDeletionCountAttribute(elem, 1);
 		print(`Editable: `, elem);
 	});

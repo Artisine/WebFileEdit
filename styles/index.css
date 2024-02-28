@@ -20,7 +20,7 @@ main {
 
 /* Make a class, which when attached to an element, will make its background colour flash red for 0.3 seconds, then fade back to default */
 .flash-red {
-	animation: flash-red 0.6s;
+	animation: flash-red 0.7s;
 }
 @keyframes flash-red {
 	0% {

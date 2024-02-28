@@ -1,4 +1,5 @@
 import { isNullish, isString } from "../utility.js";
+import { setCursorOffsetCharactersFromEnd, setCursorToEnd } from "../utility/textcursors/cursors.js";
 import { milliseconds } from "../utility/timings.js";
 export class TextStuff {
     static OnceInit() {
@@ -221,12 +222,7 @@ function attempt_editable_deletion(editable, evt) {
                 if (previousEditable instanceof HTMLElement) {
                     previousEditable.focus();
                     // and set cursor to end of text
-                    const range = document.createRange();
-                    const selection = window.getSelection();
-                    range.selectNodeContents(previousEditable);
-                    range.collapse(false);
-                    selection === null || selection === void 0 ? void 0 : selection.removeAllRanges();
-                    selection === null || selection === void 0 ? void 0 : selection.addRange(range);
+                    setCursorToEnd(previousEditable);
                     evt.preventDefault();
                 }
                 print(`Editable removed: `, editable);
@@ -243,6 +239,34 @@ function attempt_editable_deletion(editable, evt) {
         else {
             // editable.classList.add("flash-red");
             editableTapDeletionCountAttribute(editable, 1);
+        }
+    }
+    else {
+        print(`Editable not empty: `, editable);
+        // where length >= 1
+        // check if cursor is at very beginning
+        const selection = window.getSelection();
+        const range = selection === null || selection === void 0 ? void 0 : selection.getRangeAt(0);
+        const startContainer = range === null || range === void 0 ? void 0 : range.startContainer;
+        const startOffset = range === null || range === void 0 ? void 0 : range.startOffset;
+        const previousEditable = editable.previousElementSibling;
+        const shouldAppendToPreviousParagraph = ((startContainer === null || startContainer === void 0 ? void 0 : startContainer.parentElement) === editable
+            && startOffset === 0
+            && previousEditable instanceof HTMLElement
+            && !isNullish(previousEditable.textContent)
+            && !isNullish(text));
+        print(`startcontainer: `, startContainer, `startOffset: `, startOffset, `previousEditable: `, previousEditable, `shouldAppendToPreviousParagraph: `, shouldAppendToPreviousParagraph);
+        print(`Should append to previous paragraph: `, shouldAppendToPreviousParagraph, previousEditable);
+        if (shouldAppendToPreviousParagraph) {
+            editable.blur();
+            const originalLength = text.length;
+            previousEditable.textContent += text;
+            editable.remove();
+            previousEditable.focus();
+            // and set cursor to end of text
+            // setCursorToEnd(previousEditable);
+            setCursorOffsetCharactersFromEnd(previousEditable, originalLength);
+            evt.preventDefault();
         }
     }
     return;
@@ -269,6 +293,7 @@ function main() {
     const textEditables = holder.querySelectorAll("p.text");
     textEditables.forEach((elem) => {
         elem.setAttribute("contenteditable", "true");
+        elem = elem;
         addListenersToEditable(elem);
         // editableTapDeletionCountAttribute(elem, 1);
         print(`Editable: `, elem);

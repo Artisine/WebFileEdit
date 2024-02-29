@@ -1,6 +1,31 @@
+declare global {
+	function fileOpen(options: { mimeTypes: string[], multiple: boolean }): Promise<File[]>;
+}
+
+// Rest of your code...
 import { isNullish, isString } from "../utility.js";
 import { setCursorOffsetCharactersFromEnd, setCursorToEnd } from "../utility/textcursors/cursors.js";
 import { milliseconds } from "../utility/timings.js";
+
+import {
+	fileOpen as _fileOpen,
+	directoryOpen,
+	fileSave,
+	supported,
+} from "./../utility/browserfs/index.modern.js";
+if (supported) {
+	console.log('Using the File System Access API.');
+} else {
+	console.log('Using the fallback implementation.');
+}
+
+/**
+ * 
+ */
+type FileOpenFunction = (options: { mimeTypes: string[], multiple: boolean }) => Promise<File[]>;
+const fileOpen: FileOpenFunction = _fileOpen;
+
+
 
 export class TextStuff {
 
@@ -299,10 +324,37 @@ function main() {
 		print(`Editable: `, elem);
 	});
 
+
+	const btnLoadFile = document.querySelector("button#btn-load-file") as HTMLButtonElement;
+	btnLoadFile.addEventListener("click", async function() {
+		const blobs =  await getTheBlobs();
+		const textFiles = blobs.map(async(blob) => await blob.text());
+		// const textFilesCopy = blobs.map(async(blob) => await blob.text());
+		console.log({blobs, textFiles});
+		// console.log({textFilesCopy});
+
+		Promise.all(textFiles).then((values) => {
+			console.log({values});
+			values.forEach((textvalue) => {
+				const newEditable = makeNewTextEditable(holder.lastElementChild as HTMLElement);
+				newEditable.textContent = textvalue;
+			});
+		});
+
+	});
+
+
+
 	console.log("End of main.");
 };
 
-
+async function getTheBlobs() {
+	const blobs = await fileOpen({
+		mimeTypes: ["text/*"],
+		multiple: true
+	}) as Blob[];
+	return blobs;
+};
 
 
 

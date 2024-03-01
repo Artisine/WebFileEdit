@@ -7,12 +7,15 @@ import { isNullish, isString } from "../utility.js";
 import { setCursorOffsetCharactersFromEnd, setCursorToEnd } from "../utility/textcursors/cursors.js";
 import { milliseconds } from "../utility/timings.js";
 
+/**
+ * Using https://github.com/GoogleChromeLabs/browser-fs-access
+ */
 import {
 	fileOpen as _fileOpen,
 	directoryOpen,
 	fileSave,
 	supported,
-} from "./../utility/browserfs/index.modern.js";
+} from "../utility/browserfsaccess/index.modern.js";
 if (supported) {
 	console.log('Using the File System Access API.');
 } else {

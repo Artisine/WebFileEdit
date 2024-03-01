@@ -1,6 +1,7 @@
 declare global {
 	function fileOpen(options: { mimeTypes: string[], multiple: boolean }): Promise<File[]>;
 }
+const print = console.log;
 
 // Rest of your code...
 import { isNullish, isString } from "../utility.js";
@@ -16,16 +17,42 @@ import {
 	fileSave,
 	supported,
 } from "../utility/browserfsaccess/index.modern.js";
+import { CoreFileOptions } from "../utility/browserfsaccess/index.js";
+import Collection from "../collection/collection.js";
+import { whenMarkdown, whenPlainText } from "./textprocessing/textprocessmain.js";
 if (supported) {
 	console.log('Using the File System Access API.');
 } else {
 	console.log('Using the fallback implementation.');
 }
 
+const abc: CoreFileOptions = {
+	description: "Text files",
+	extensions: [".txt"],
+};
+print({abc});
+
 /**
  * 
  */
-type FileOpenFunction = (options: { mimeTypes: string[], multiple: boolean }) => Promise<File[]>;
+type FileOpenFunction = (options: FileOpenFunctionOptions) => Promise<File[]>;
+// Options are optional. You can pass an array of options, too.
+type FileOpenFunctionOptions = {
+	// List of allowed MIME types, defaults to `*/*`.
+	mimeTypes?: string[],
+	// List of allowed file extensions (with leading '.'), defaults to `''`.
+	extensions?: string[],
+	// Set to `true` for allowing multiple files, defaults to `false`.
+	multiple?: boolean,
+	// Textual description for file dialog , defaults to `''`.
+	description?: string,
+	// Suggested directory in which the file picker opens. A well-known directory, or a file or directory handle.
+	startIn?: string,
+	// By specifying an ID, the user agent can remember different directories for different IDs.
+	id?: string,
+	// Include an option to not apply any filter in the file picker, defaults to `false`.
+	excludeAcceptAllOption?: boolean,
+};
 const fileOpen: FileOpenFunction = _fileOpen;
 
 
@@ -39,7 +66,6 @@ export class TextStuff {
 	}
 };
 
-const print = console.log;
 
 type T_handlerFunc = (editable: HTMLElement, inputEvent: InputEvent) => void;
 const inputTypesAndTheirAssociatedHandlerFunctions: Partial<Record<InputEvent["inputType"], T_handlerFunc>> = {
@@ -331,6 +357,16 @@ function main() {
 	const btnLoadFile = document.querySelector("button#btn-load-file") as HTMLButtonElement;
 	btnLoadFile.addEventListener("click", async function() {
 		const blobs =  await getTheBlobs();
+
+		return doThingsWithBlobs(blobs);
+
+
+
+
+
+
+
+
 		const textFiles = blobs.map(async(blob) => await blob.text());
 		// const textFilesCopy = blobs.map(async(blob) => await blob.text());
 		console.log({blobs, textFiles});
@@ -340,6 +376,10 @@ function main() {
 			console.log({values});
 			values.forEach((textvalue) => {
 				const newEditable = makeNewTextEditable(holder.lastElementChild as HTMLElement);
+
+				// const processedTextValue
+
+
 				newEditable.textContent = textvalue;
 			});
 		});
@@ -351,11 +391,67 @@ function main() {
 	console.log("End of main.");
 };
 
+function doThingsWithBlobs(blobs: Blob[]) {
+	console.log({blobs});
+	const fileTypes = blobs.map(blob => blob.type);
+	console.log({ fileTypes });
+
+	const fileTypesWhichAreTextual = [
+		"text/plain",
+		"text/markdown",
+		"text/html",
+		"application/json",
+		"application/xml",
+		"text/javascript",
+		"text/css",
+		"text/x-python",
+		"text/x-java",
+		"application/typescript",
+		"application/x-php",
+		"application/x-ruby",
+		"application/x-csharp",
+		"application/x-cplusplus",
+		"application/x-go",
+		"application/x-swift",
+		"application/x-rust",
+		"application/x-kotlin",
+		"application/x-scala",
+		"application/x-perl",
+	];
+	const textFilesBlobs = blobs.filter(blob => fileTypesWhichAreTextual.includes(blob.type));
+	const textFileContents = new Collection(textFilesBlobs.map(item => [item, [item.type, item.text()]]));
+	const processedTextValues = textFileContents.map(async(fileTypeAndTextContents, blob) => {
+		const [fileTypeString, textContentsPromise] = fileTypeAndTextContents as [string, Promise<string>];
+		const textContents = await textContentsPromise;
+		if (fileTypeString === "text/plain") {
+			return whenPlainText(textContents);
+		} else if (fileTypeString === "text/markdown") {
+			return whenMarkdown(textContents);
+		} else {
+			throw new Error("ur mom");
+		}
+		return textContents;
+	});
+
+	const holder = document.querySelector("div[name='holder']") as HTMLDivElement;
+	// console.log(holder);
+	processedTextValues.forEach(async(textvalue)=>{
+		const newEditable = makeNewTextEditable(holder.lastElementChild as HTMLElement);
+		newEditable.textContent = await textvalue;
+
+	});
+
+	return;
+};
+
 async function getTheBlobs() {
 	const blobs = await fileOpen({
-		mimeTypes: ["text/*"],
-		multiple: true
+		// mimeTypes: ["text/txt", "text/markdown"],
+		multiple: true,
+		extensions: [".txt", ".md"],
+		excludeAcceptAllOption: false
 	}) as Blob[];
+	console.info({blobs});
 	return blobs;
 };
 

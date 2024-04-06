@@ -359,31 +359,41 @@ function main() {
 		const blobs =  await getTheBlobs();
 
 		return doThingsWithBlobs(blobs);
+	});
 
+	const btnLoadFromLocalstorage = document.querySelector("button#load-from-localstorage") as HTMLButtonElement;
+	btnLoadFromLocalstorage.addEventListener("click", async function() {
+		const localStorage = window.localStorage;
+		const keys = Object.keys(localStorage);
+		console.log(`Local Storage keys: `, keys);
+		const thingToLoad = window.prompt(`Enter the key to load from LocalStorage:\n` + keys.join("\n") + "\n[End]");
+		if (!thingToLoad) {
+			window.alert(`You did not enter anything.`);
+			return;
+		}
+		if (keys.includes(thingToLoad)) {
+			// const base64 = localStorage.getItem(thingToLoad);
+			// const blob = new Blob([base64], {type: "image/png"});
+			// return doThingsWithBlobs([blob]);
+			window.alert(`You wanted to load file "${thingToLoad}" from LocalStorage.`);
+		} else {
+			window.alert(`The key "${thingToLoad}" does not exist in LocalStorage.`);
+			return;
+		}
 
+		const fileExtension = thingToLoad.split(".").pop();
+		if (fileExtension === undefined) {
+			window.alert(`The key "${thingToLoad}" does not have a file extension.`);
+			return;
+		}
+		const imageContentsBase64 = localStorage.getItem(thingToLoad) as string;
+		
+		const img = createImgFromBase64String(imageContentsBase64);
+		const imageHolderElem = document.querySelector("#image-holder") as HTMLDivElement;
+		imageHolderElem.appendChild(img);
+		console.log(`Contents loaded, check the image holder!`);
 
-
-
-
-
-
-		const textFiles = blobs.map(async(blob) => await blob.text());
-		// const textFilesCopy = blobs.map(async(blob) => await blob.text());
-		console.log({blobs, textFiles});
-		// console.log({textFilesCopy});
-
-		Promise.all(textFiles).then((values) => {
-			console.log({values});
-			values.forEach((textvalue) => {
-				const newEditable = makeNewTextEditable(holder.lastElementChild as HTMLElement);
-
-				// const processedTextValue
-
-
-				newEditable.textContent = textvalue;
-			});
-		});
-
+		return;
 	});
 
 
@@ -418,7 +428,17 @@ function doThingsWithBlobs(blobs: Blob[]) {
 		"application/x-scala",
 		"application/x-perl",
 	];
+	const fileTypesWhichAreImages = [
+		"image/jpeg",
+		"image/png",
+		"image/gif",
+		"image/webp",
+		"image/svg+xml",
+		"image/bmp",
+		"image/tiff",
+	];
 	const textFilesBlobs = blobs.filter(blob => fileTypesWhichAreTextual.includes(blob.type));
+	const imageFileBlobs = blobs.filter(blob => fileTypesWhichAreImages.includes(blob.type));
 	const textFileContents = new Collection(textFilesBlobs.map(item => [item, [item.type, item.text()]]));
 	const processedTextValues = textFileContents.map(async(fileTypeAndTextContents, blob) => {
 		const [fileTypeString, textContentsPromise] = fileTypeAndTextContents as [string, Promise<string>];
@@ -441,6 +461,66 @@ function doThingsWithBlobs(blobs: Blob[]) {
 
 	});
 
+
+
+	/* Image specific section */
+	const imageHolderElem = document.querySelector("#image-holder") as HTMLDivElement;
+	imageFileBlobs.forEach(async(blob) => {
+		const sourceTextMaybe = await blob.text();
+		const img = document.createElement("img");
+		img.style.cursor = "pointer";
+		// img.src = URL.createObjectURL(blob);
+		img.src = await blobToBase64(blob);
+		imageHolderElem.appendChild(img);
+
+		console.log(`You gave me a Blob: `, blob, `\nBlob source-text: `, {sourceTextMaybe}, `\nCreated an image using that: `, img);
+		img.addEventListener("click", (evt)=>{
+			imgClickHandler(evt, blob as File);
+		});
+	});
+
+
+
+
+
+	return;
+};
+
+function blobToBase64(blob: Blob): Promise<string> {
+	return new Promise((resolve, reject)=>{
+		const reader = new FileReader();
+		reader.onloadend = ()=> resolve(reader.result as string);
+		reader.onerror = reject;
+		reader.readAsDataURL(blob);
+	});
+};
+function createImgFromBase64String(b64string: string) {
+	const img = document.createElement("img");
+	img.style.cursor = "pointer";
+	img.src = b64string;
+	console.log(`Created an image using base64 string: `, img);
+	return img;
+}
+
+async function imgClickHandler(evt: MouseEvent, file: File) {
+	// console.log(`You click image element: `, evt.target);
+	const img = evt.target as HTMLImageElement;
+	console.log(file);
+	const wantToSave = window.confirm(`Do you want to save this image "${file.name}" ?`);
+	if (wantToSave) {
+		console.log(`You want to save the image "${file.name}".`);
+
+		const imageContentsAsBase64 = await blobToBase64(file);
+
+		const localStorage = window.localStorage;
+		localStorage.setItem(file.name, imageContentsAsBase64);
+
+		console.log(`Contents saved, check LocalStorage!`);
+		window.alert(`Contents saved, check LocalStorage!`);
+	} else {
+		console.log(`You do not want to save the image "${file.name}".`);
+	}
+
 	return;
 };
 
@@ -448,7 +528,7 @@ async function getTheBlobs() {
 	const blobs = await fileOpen({
 		// mimeTypes: ["text/txt", "text/markdown"],
 		multiple: true,
-		extensions: [".txt", ".md"],
+		extensions: [".txt", ".md", ".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".bmp", ".tiff"],
 		excludeAcceptAllOption: false
 	}) as Blob[];
 	console.info({blobs});
